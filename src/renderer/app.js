@@ -95,6 +95,7 @@ mate.onSettingsChanged(async (next) => {
   if (prev.characterHeight !== next.characterHeight) resize();
   if (prev.cameraEnabled !== next.cameraEnabled || prev.showPreview !== next.showPreview) applyCamera();
   applyWeather();
+  character.setEyeCensor(next.eyeCensor);
 });
 mate.onBoundsChanged(() => resize());
 window.addEventListener('resize', resize);
@@ -174,6 +175,7 @@ mate.onPerformAction((action) => character.perform(action));
 let weather = await mate.getWeather();
 const applyWeather = () => character.board.setWeather(settings.weatherDoodle ? weather : null);
 applyWeather();
+character.setEyeCensor(settings.eyeCensor);
 mate.onWeather((w) => {
   weather = w;
   applyWeather();

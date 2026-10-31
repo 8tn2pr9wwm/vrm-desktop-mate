@@ -33,6 +33,7 @@ const DEFAULT_SETTINGS = {
   cameraEnabled: true,
   lookMode: 'user',
   mimicHeadTilt: true,
+  eyeCensor: false,
   wander: true,
   showPreview: false,
   pixelPitchMm: 0.2,
@@ -270,6 +271,12 @@ function rebuildTrayMenu() {
       type: 'checkbox',
       checked: settings.mimicHeadTilt,
       click: (item) => updateSettings({ mimicHeadTilt: item.checked }),
+    },
+    {
+      label: '目に目線を入れる(プライバシー)',
+      type: 'checkbox',
+      checked: settings.eyeCensor,
+      click: (item) => updateSettings({ eyeCensor: item.checked }),
     },
     {
       label: '歩き回る',

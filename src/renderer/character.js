@@ -127,6 +127,7 @@ export class Character {
     this.hipsBaseY = this.bone('hips').position.y;
     this.headRestQ = this.rootRelativeQuaternion(this.bone('head'));
     this.lipLocal = this.measureLips();
+    this.eyeBar = this.buildEyeBar();
     this.footRest = {};
     for (const prefix of ['left', 'right']) {
       const foot = this.bone(`${prefix}Foot`);
@@ -146,6 +147,50 @@ export class Character {
     this.root.remove(this.vrm.scene);
     VRMUtils.deepDispose(this.vrm.scene);
     this.vrm = null;
+    this.eyeBar = null;
+  }
+
+  /** A black privacy bar over the eyes, parented to the head bone so it follows every pose. */
+  buildEyeBar() {
+    const head = this.bone('head');
+    if (!head) return null;
+    const inHead = (o) => head.worldToLocal(o.getWorldPosition(new THREE.Vector3()));
+    const qInv = head.getWorldQuaternion(new THREE.Quaternion()).invert();
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(qInv);
+    const le = this.bone('leftEye');
+    const re = this.bone('rightEye');
+    let center, xAxis, eyeSpan;
+    if (le && re) {
+      const pl = inHead(le);
+      const pr = inHead(re);
+      center = pl.clone().add(pr).multiplyScalar(0.5);
+      xAxis = pr.clone().sub(pl);
+      eyeSpan = xAxis.length();
+      xAxis.normalize();
+    } else {
+      center = (this.lipLocal ?? new THREE.Vector3()).clone().addScaledVector(up, this.height * 0.04);
+      xAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(qInv);
+      eyeSpan = this.height * 0.04;
+    }
+    const zAxis = xAxis.clone().cross(up).normalize();
+    if (center.dot(zAxis) < 0) zAxis.negate();
+    const yAxis = zAxis.clone().cross(xAxis).normalize();
+    const w = Math.max(eyeSpan * 2.4, 0.05);
+    const h = Math.max(eyeSpan * 0.55, 0.015);
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, Math.min(h * 0.4, 0.02)),
+      new THREE.MeshBasicMaterial({ color: 0x141414 })
+    );
+    mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis));
+    mesh.position.copy(center).addScaledVector(zAxis, h * 0.5 + 0.004);
+    mesh.visible = !!this.eyeCensorOn;
+    head.add(mesh);
+    return mesh;
+  }
+
+  setEyeCensor(on) {
+    this.eyeCensorOn = !!on;
+    if (this.eyeBar) this.eyeBar.visible = this.eyeCensorOn;
   }
 
   // Fingertip offsets in the normalized distal bones' frames, taken from the skin vertices each distal bone
