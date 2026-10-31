@@ -11,6 +11,7 @@
     "dist": "npm run build:renderer && electron-builder --mac",
     "dist:dir": "npm run build:renderer && electron-builder --mac --dir",
     "install:app": "npm run dist:dir && rm -rf '/Applications/VRM Desktop Mate.app' && mv 'dist/mac-arm64/VRM Desktop Mate.app' /Applications/",
+    "build:web": "bash tools/build-web.sh",
     "check": "node --check src/main.js && node --check src/preload.js && npm run build:renderer"
   },
   "license": "MIT",
