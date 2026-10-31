@@ -127,6 +127,13 @@ function fitWindowToDisplay() {
   win.webContents.send('bounds-changed', win.getBounds());
 }
 
+// {forward:true} is only supported on macOS/Windows and makes the toggle unreliable on Linux.
+function setIgnore(ignore) {
+  if (!win) return;
+  if (process.platform === 'linux') win.setIgnoreMouseEvents(ignore);
+  else win.setIgnoreMouseEvents(ignore, { forward: true });
+}
+
 function createWindow() {
   const { workArea } = screen.getPrimaryDisplay();
   win = new BrowserWindow({
@@ -154,7 +161,7 @@ function createWindow() {
 
   win.setAlwaysOnTop(true, 'floating');
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  if (!DEBUG) win.setIgnoreMouseEvents(true, { forward: true });
+  if (!DEBUG) setIgnore(true);
 
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'), {
     query: DEBUG ? { debug: '1' } : {},
@@ -404,7 +411,7 @@ function registerIpc() {
   ipcMain.on('show-menu', () => trayMenu?.popup({ window: win }));
   ipcMain.on('set-ignore-mouse', (_e, ignore) => {
     if (!win || DEBUG) return;
-    win.setIgnoreMouseEvents(ignore, { forward: true });
+    setIgnore(ignore);
   });
   ipcMain.on('vrm-dropped', (_e, filePath) => {
     if (typeof filePath === 'string' && filePath.toLowerCase().endsWith('.vrm') && fs.existsSync(filePath)) {
