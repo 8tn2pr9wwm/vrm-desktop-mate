@@ -278,6 +278,9 @@ function rebuildTrayMenu() {
   ];
   const menu = Menu.buildFromTemplate([
     {
+      label: '設定',
+      submenu: [
+    {
       label: 'カメラで顔・視線を追従',
       type: 'checkbox',
       checked: settings.cameraEnabled,
@@ -344,7 +347,11 @@ function rebuildTrayMenu() {
         click: () => updateSettings({ characterHeight: h }),
       })),
     },
-    { type: 'separator' },
+      ],
+    },
+    {
+      label: 'アクション',
+      submenu: [
     {
       label: '視線キャリブレーション（キャラを見つめながらクリック）',
       click: () => win?.webContents.send('calibrate-gaze'),
@@ -409,7 +416,11 @@ function rebuildTrayMenu() {
         click: () => win?.webContents.send('perform-action', `pose:${m.id}`),
       })),
     },
-    { type: 'separator' },
+      ],
+    },
+    {
+      label: 'VRM',
+      submenu: [
     { label: 'VRMを開く…', click: chooseVrm },
     {
       label: 'デフォルトのVRMに戻す',
@@ -432,6 +443,8 @@ function rebuildTrayMenu() {
           enabled: settings.vrmList.length > 1,
           click: () => rotateVrm(true),
         },
+      ],
+    },
       ],
     },
     { type: 'separator' },
