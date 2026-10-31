@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('mate', {
   onCalibrateGaze: on('calibrate-gaze'),
   onPerformAction: on('perform-action'),
   onRemotePointer: on('remote-pointer'),
+  onAlert: on('alert'),
   sendCharRect: (r) => ipcRenderer.send('char-rect', r),
   getWeather: () => ipcRenderer.invoke('get-weather'),
   onWeather: on('weather'),

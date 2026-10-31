@@ -44,6 +44,8 @@ const DEFAULT_SETTINGS = {
   clickThrough: true,
   vrmList: [],
   vrmRotate: false,
+  alertEnabled: true,
+  alertMinScale: 4,
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -260,6 +262,69 @@ async function chooseVrmList() {
 }
 
 /** Advance to the next VRM in the rotation list; force=true ignores the hourly-toggle setting. */
+// --- Disaster alerts via P2PQuake public API (no key needed) ---
+const ALERT_POLL_MS = 20000;
+let alertCurrent = null;
+
+const JMA_SCALE = { 10: '1', 20: '2', 30: '3', 40: '4', 45: '5弱', 50: '5強', 55: '6弱', 60: '6強', 70: '7' };
+const scaleText = (s) => JMA_SCALE[s] ?? `${s}`;
+
+function pickAlert(list) {
+  const now = Date.now();
+  for (const e of list) {
+    if (e.cancelled) continue;
+    const t = Date.parse(e.time);
+    if (e.code === 551 && now - t < 2 * 60 * 1000) {
+      return {
+        id: e.id,
+        title: '緊急地震速報',
+        detail: `${e.earthquake?.hypocenter?.name ?? ''} 推定震度${scaleText(e.earthquake?.maxScale)}`,
+        until: t + 2 * 60 * 1000,
+      };
+    }
+    if (e.code === 555 && now - t < 60 * 60 * 1000) {
+      const grades = [...new Set((e.areas ?? []).map((a) => a.grade))].filter(Boolean);
+      return {
+        id: e.id,
+        title: `津波${grades.find((g) => g.includes('警報')) ? '警報' : '情報'}`,
+        detail: grades.join('・'),
+        until: t + 60 * 60 * 1000,
+      };
+    }
+    const scale = e.earthquake?.maxScale ?? 0;
+    if (e.code === 552 && scale >= settings.alertMinScale * 10 && now - t < 30 * 60 * 1000) {
+      return {
+        id: e.id,
+        title: `震度速報 震度${scaleText(scale)}`,
+        detail: e.earthquake?.hypocenter?.name ?? '',
+        until: t + 30 * 60 * 1000,
+      };
+    }
+  }
+  return null;
+}
+
+async function pollAlerts() {
+  const clear = () => {
+    if (alertCurrent) {
+      alertCurrent = null;
+      win?.webContents.send('alert', null);
+    }
+  };
+  if (!settings.alertEnabled) return clear();
+  try {
+    const res = await net.fetch('https://api.p2pquake.net/v2/history?codes=551&codes=552&codes=555&limit=5');
+    const next = pickAlert(await res.json());
+    if (next?.id !== alertCurrent?.id || !!next !== !!alertCurrent) {
+      alertCurrent = next;
+      win?.webContents.send('alert', next);
+    }
+  } catch (e) {
+    console.warn('alert poll failed:', e.message);
+    if (alertCurrent && Date.now() > alertCurrent.until) clear();
+  }
+}
+
 const USER_MOTION_DIR = () => path.join(app.getPath('userData'), 'motions-vrma');
 
 /** .vrma files the user added — scanned fresh each time so files dropped into the folder just work. */
@@ -421,6 +486,22 @@ function rebuildTrayMenu() {
     {
       label: 'キャリブレーションをリセット',
       click: () => updateSettings({ gazeOffset: { x: 0, y: 0 } }),
+    },
+    {
+      label: '災害アラート(P2P地震情報)',
+      type: 'checkbox',
+      checked: settings.alertEnabled,
+      click: (item) => updateSettings({ alertEnabled: item.checked }),
+    },
+    {
+      label: 'アラート表示テスト',
+      click: () =>
+        win?.webContents.send('alert', {
+          id: 'test',
+          title: '緊急地震速報（テスト）',
+          detail: 'これは表示テストです',
+          until: Date.now() + 30000,
+        }),
     },
     {
       label: 'カメラプレビューを表示',
@@ -636,6 +717,9 @@ app.whenReady().then(async () => {
   screen.on('display-removed', fitWindowToDisplay);
 
   setInterval(() => rotateVrm(false), 60 * 60 * 1000);
+
+  pollAlerts();
+  setInterval(pollAlerts, ALERT_POLL_MS);
 });
 
 app.on('window-all-closed', () => app.quit());

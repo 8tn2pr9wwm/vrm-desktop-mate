@@ -190,6 +190,22 @@ window.addEventListener('drop', (e) => {
   if (file) mate.dropVrm(file);
 });
 
+// --- Disaster alerts: hold the board up while an alert is active ---
+let alert = null;
+mate.onAlert?.((a) => {
+  alert = a;
+  character.board.setMessage(a ? `${a.title}\n${a.detail}` : null);
+});
+setInterval(() => {
+  if (!alert) return;
+  if (Date.now() > alert.until) {
+    alert = null;
+    character.board.setMessage(null);
+    return;
+  }
+  if (character.state === 'idle') character.perform('clock:message');
+}, 2000);
+
 // --- Gaze ---
 let watchTime = 0;
 let lastRawGazePx = null;
