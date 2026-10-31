@@ -230,6 +230,7 @@ function rebuildTrayMenu() {
     ['小', 200],
     ['中', 300],
     ['大', 420],
+    ['特大', 560],
   ];
   const menu = Menu.buildFromTemplate([
     {

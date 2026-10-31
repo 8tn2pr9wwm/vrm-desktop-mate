@@ -175,14 +175,14 @@ export class Character {
     const zAxis = xAxis.clone().cross(up).normalize();
     if (center.dot(zAxis) < 0) zAxis.negate();
     const yAxis = zAxis.clone().cross(xAxis).normalize();
-    const w = Math.max(eyeSpan * 2.4, 0.05);
-    const h = Math.max(eyeSpan * 0.55, 0.015);
+    const w = Math.max(eyeSpan * 3.0, 0.05);
+    const h = Math.max(eyeSpan * 0.7, 0.02);
     const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h, Math.min(h * 0.4, 0.02)),
+      new THREE.BoxGeometry(w, h, Math.min(h * 0.35, 0.02)),
       new THREE.MeshBasicMaterial({ color: 0x141414 })
     );
     mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis));
-    mesh.position.copy(center).addScaledVector(zAxis, h * 0.5 + 0.004);
+    mesh.position.copy(center).addScaledVector(zAxis, Math.max(eyeSpan * 0.9, 0.045));
     mesh.visible = !!this.eyeCensorOn;
     head.add(mesh);
     return mesh;
