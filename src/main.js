@@ -50,6 +50,7 @@ let settings = { ...DEFAULT_SETTINGS };
 let win = null;
 let tray = null;
 let trayMenu = null;
+let handle = null;
 let cursorTimer = null;
 
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
@@ -132,15 +133,43 @@ function fitWindowToDisplay() {
 }
 
 // {forward:true} is only supported on macOS/Windows and makes the toggle unreliable on Linux.
-// X11 shape-region updates also race with pointer grabs, so re-apply the toggle shortly after.
+// On Linux the overlay always stays click-through; a small follow-window ("handle") over the
+// character receives pointer input instead and forwards it as IPC.
 function setIgnore(ignore) {
   if (!win) return;
-  if (process.platform === 'linux') {
-    win.setIgnoreMouseEvents(ignore);
-    setTimeout(() => win && !win.isDestroyed() && win.setIgnoreMouseEvents(ignore), 120);
-  } else {
-    win.setIgnoreMouseEvents(ignore, { forward: true });
-  }
+  if (process.platform === 'linux') win.setIgnoreMouseEvents(true);
+  else win.setIgnoreMouseEvents(ignore, { forward: true });
+}
+
+function createHandle() {
+  handle = new BrowserWindow({
+    width: 1,
+    height: 1,
+    x: -100,
+    y: -100,
+    transparent: true,
+    backgroundColor: '#00000000',
+    frame: false,
+    hasShadow: false,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    alwaysOnTop: true,
+    show: true,
+    focusable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-handle.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  });
+  handle.setAlwaysOnTop(true, 'floating');
+  handle.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  handle.loadFile(path.join(__dirname, 'renderer', 'handle.html'));
 }
 
 function createWindow() {
@@ -487,6 +516,32 @@ function registerIpc() {
     if (!win || DEBUG) return;
     setIgnore(ignore);
   });
+  ipcMain.on('char-rect', (_e, r) => {
+    if (!handle || handle.isDestroyed() || !win) return;
+    const b = win.getBounds();
+    const pad = 12;
+    handle.setBounds({
+      x: Math.round(b.x + r.left - pad),
+      y: Math.round(b.y + r.top - pad),
+      width: Math.max(1, Math.round(r.right - r.left + pad * 2)),
+      height: Math.max(1, Math.round(r.bottom - r.top + pad * 2)),
+    });
+  });
+  ipcMain.on('handle-pointer', (_e, ev) => {
+    if (!win || !handle || handle.isDestroyed()) return;
+    if (ev.type === 'menu') {
+      trayMenu?.popup({ window: handle });
+      return;
+    }
+    const hb = handle.getBounds();
+    const wb = win.getBounds();
+    win.webContents.send('remote-pointer', {
+      type: ev.type,
+      x: hb.x + ev.x - wb.x,
+      y: hb.y + ev.y - wb.y,
+      button: ev.button,
+    });
+  });
   ipcMain.on('vrm-dropped', (_e, filePath) => {
     if (typeof filePath === 'string' && filePath.toLowerCase().endsWith('.vrm') && fs.existsSync(filePath)) {
       updateSettings({ vrmPath: filePath });
@@ -512,6 +567,7 @@ app.whenReady().then(async () => {
 
   registerIpc();
   createWindow();
+  if (process.platform === 'linux' && !DEBUG) createHandle();
   refreshWeather();
   setInterval(refreshWeather, WEATHER_REFRESH_MS);
 

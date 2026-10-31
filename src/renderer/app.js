@@ -131,7 +131,7 @@ function updateHover() {
         : elapsed > 300 ? false : hovering;
   if (next !== hovering) {
     hovering = next;
-    mate.setIgnoreMouse(!hovering);
+    if (!LINUX) mate.setIgnoreMouse(!hovering);
     document.body.classList.toggle('hover', hovering);
   }
 }
@@ -145,7 +145,9 @@ mate.onCursor((p) => {
 window.addEventListener('pointerdown', (e) => {
   if (!hovering || e.button !== 0) return;
   pointerDown = { x: e.clientX, y: e.clientY, moved: false };
-  canvas.setPointerCapture(e.pointerId);
+  try {
+    canvas.setPointerCapture(e.pointerId);
+  } catch {}
 });
 window.addEventListener('pointermove', (e) => {
   cursor = { x: e.clientX, y: e.clientY };
@@ -171,6 +173,16 @@ window.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   mate.showMenu();
 });
+// Linux: pointer events arrive via the small follow-window ("handle") over the character.
+mate.onRemotePointer?.((e) => {
+  if (e.type === 'menu') {
+    mate.showMenu();
+    return;
+  }
+  hovering = true;
+  window.dispatchEvent(new PointerEvent(`pointer${e.type}`, { clientX: e.x, clientY: e.y, button: e.button }));
+});
+let lastRectSent = 0;
 window.addEventListener('dragover', (e) => e.preventDefault());
 window.addEventListener('drop', (e) => {
   e.preventDefault();
@@ -271,6 +283,10 @@ function frame() {
     const look = computeLook(dt, now);
     character.update(dt, { worldWidth: view.w / ppm, wander: settings.wander, ...look });
     if (character.state === 'held' || character.state === 'fall') updateHover();
+    if (LINUX && now - lastRectSent > 60) {
+      lastRectSent = now;
+      mate.sendCharRect?.(character.screenRect(ppm, view.h));
+    }
   }
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

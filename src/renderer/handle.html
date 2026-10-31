@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; cursor: grab; }
+      body.grabbing { cursor: grabbing; }
+    </style>
+  </head>
+  <body>
+    <script>
+      const send = (type) => (e) => {
+        e.preventDefault();
+        if (type === 'down') document.body.classList.add('grabbing');
+        if (type === 'up') document.body.classList.remove('grabbing');
+        handleBridge.sendPointer(type, e);
+      };
+      addEventListener('pointerdown', send('down'));
+      addEventListener('pointermove', send('move'));
+      addEventListener('pointerup', send('up'));
+      addEventListener('contextmenu', send('menu'));
+    </script>
+  </body>
+</html>
