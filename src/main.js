@@ -185,10 +185,24 @@ function createWindow() {
   });
 }
 
+const TRAY_ICON_DATA_URL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAANUlEQVR42mNgGJbgy6cX/5ExTQylmuGjBtM+8miWtIjFowYPAoNJsYQqqQQXf9TgQWzwoAMAq5juKjB9fGUAAAAASUVORK5CYII=';
+
+function trayDiag(msg) {
+  try {
+    fs.appendFileSync(path.join(app.getPath('userData'), 'tray-debug.log'), `${new Date().toISOString()} ${msg}\n`);
+  } catch {}
+}
+
 function trayIcon() {
   // Template images are a macOS menu-bar concept; Windows needs a visibly-colored icon for dark taskbars.
   const file = process.platform === 'win32' ? 'tray.png' : 'trayTemplate.png';
-  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', file));
+  const p = path.join(__dirname, '..', 'assets', file);
+  let icon = nativeImage.createFromPath(p);
+  if (icon.isEmpty()) {
+    trayDiag(`tray icon unreadable: ${p} exists=${fs.existsSync(p)}; using embedded icon`);
+    icon = nativeImage.createFromDataURL(TRAY_ICON_DATA_URL);
+  }
   if (process.platform === 'darwin') icon.setTemplateImage(true);
   return icon;
 }
@@ -417,6 +431,7 @@ app.whenReady().then(async () => {
     tray.setToolTip('VRM Desktop Mate');
     if (process.platform === 'win32') tray.on('click', () => tray.popUpContextMenu());
   } catch (e) {
+    trayDiag(`tray creation failed: ${e.stack || e}`);
     console.error('tray creation failed:', e);
   }
   rebuildTrayMenu();
