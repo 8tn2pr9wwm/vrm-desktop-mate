@@ -16,13 +16,25 @@ npm run dist       # dmg / zip ビルド
 ## 環境注意(重要)
 
 - Devin Desktop / Windsurf 系のターミナルでは `ELECTRON_RUN_AS_NODE=1` が
-  環境変数に混入していることがある。この状態で `npm start` すると
+  環境変数に混入している。この状態で `npm start` すると
   `TypeError: Cannot read properties of undefined (reading 'whenReady')`
   で即落ちる。起動時は以下を使うこと:
 
   ```bash
   env -u ELECTRON_RUN_AS_NODE npm run dev
   ```
+
+  さらに `open` も呼び出し側の環境変数をアプリへ引き継ぐ。
+  この変数付きで `open` した .app は、Electron の fuse 保護(同一署名の親からのみ
+  Node モード許可)により **JS 実行前にサイレント終了** する(エラーもクラッシュ
+  レポートも出ない)。ビルド済み .app の起動確認は必ず
+  `env -u ELECTRON_RUN_AS_NODE open "/Applications/VRM Desktop Mate.app"` で行う。
+  Finder のダブルクリックには影響しない。
+
+- 署名なしビルド: `build.mac.identity = null` で electron-builder がアドホック
+  署名する。手で直す場合は `codesign --force --sign - --timestamp=none <app>`
+  (`--deep` は失敗することがある)。`asar: false` 構成のため Resources 変更後は
+  再署名が必要。
 
 - プロジェクトを別パスへ移動した場合、カメラ権限は Electron.app のパス単位で
   再要求される(macOS の TCC 仕様)。
