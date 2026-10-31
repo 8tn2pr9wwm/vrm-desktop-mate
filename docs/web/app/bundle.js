@@ -90,6 +90,7 @@ function rebuildMenu() {
     check("\u9996\u306E\u50BE\u304D\u3092\u307E\u306D\u308B", "mimicHeadTilt"),
     check("\u76EE\u306B\u76EE\u7DDA\u3092\u5165\u308C\u308B", "eyeCensor"),
     check("\u6B69\u304D\u56DE\u308B", "wander"),
+    check("\u30AD\u30E3\u30E9\u4EE5\u5916\u3092\u30AF\u30EA\u30C3\u30AF\u900F\u904E", "clickThrough"),
     "<fieldset><legend>\u5927\u304D\u3055</legend>",
     radio("\u5C0F", "characterHeight", 200),
     radio("\u4E2D", "characterHeight", 300),
@@ -53458,6 +53459,7 @@ var lerpArr = (a2, b2, t2) => a2.map((x3, i3) => lerp3(x3, b2[i3], t2));
 // src/renderer/app.js
 var mate = window.mate;
 var DEBUG = new URLSearchParams(location.search).has("debug");
+var LINUX = new URLSearchParams(location.search).has("linux");
 var canvas = document.getElementById("scene");
 var previewEl = document.getElementById("preview");
 var previewCanvas = previewEl.querySelector("canvas");
@@ -53543,10 +53545,18 @@ var cursor = { x: -1, y: -1 };
 var cursorMovedAt = -Infinity;
 var hovering = false;
 var pointerDown = null;
+var insideRaw = false;
+var insideSince = 0;
 function updateHover() {
   const r2 = character.screenRect(ppm, view.h);
-  const inside = cursor.x >= r2.left && cursor.x <= r2.right && cursor.y >= r2.top && cursor.y <= r2.bottom;
-  const next = inside || character.state === "held";
+  const pad = LINUX ? 90 : 0;
+  const inside = cursor.x >= r2.left - pad && cursor.x <= r2.right + pad && cursor.y >= r2.top - pad && cursor.y <= r2.bottom + pad || character.state === "held";
+  if (inside !== insideRaw) {
+    insideRaw = inside;
+    insideSince = performance.now();
+  }
+  const elapsed = performance.now() - insideSince;
+  const next = !settings2.clickThrough ? true : !LINUX ? insideRaw : insideRaw ? elapsed > 120 || hovering : elapsed > 300 ? false : hovering;
   if (next !== hovering) {
     hovering = next;
     mate.setIgnoreMouse(!hovering);

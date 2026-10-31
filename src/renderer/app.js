@@ -107,12 +107,28 @@ let cursorMovedAt = -Infinity;
 let hovering = false;
 let pointerDown = null;
 
+let insideRaw = false;
+let insideSince = 0;
 function updateHover() {
   const r = character.screenRect(ppm, view.h);
   // Linux: enlarge the hot zone so click-through lifts before the pointer actually presses.
   const pad = LINUX ? 90 : 0;
-  const inside = cursor.x >= r.left - pad && cursor.x <= r.right + pad && cursor.y >= r.top - pad && cursor.y <= r.bottom + pad;
-  const next = inside || character.state === 'held';
+  const inside =
+    (cursor.x >= r.left - pad && cursor.x <= r.right + pad && cursor.y >= r.top - pad && cursor.y <= r.bottom + pad) ||
+    character.state === 'held';
+  if (inside !== insideRaw) {
+    insideRaw = inside;
+    insideSince = performance.now();
+  }
+  // clickThrough off = stay interactive; Linux = require edges to persist (X11 region updates are flaky).
+  const elapsed = performance.now() - insideSince;
+  const next = !settings.clickThrough
+    ? true
+    : !LINUX
+      ? insideRaw
+      : insideRaw
+        ? elapsed > 120 || hovering
+        : elapsed > 300 ? false : hovering;
   if (next !== hovering) {
     hovering = next;
     mate.setIgnoreMouse(!hovering);

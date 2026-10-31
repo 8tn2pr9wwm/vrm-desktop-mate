@@ -41,6 +41,7 @@ const DEFAULT_SETTINGS = {
   gazeOffset: { x: 0, y: 0 },
   clockMode: 'hour',
   weatherDoodle: true,
+  clickThrough: true,
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -67,6 +68,7 @@ function saveSettings() {
 
 function updateSettings(patch) {
   settings = { ...settings, ...patch };
+  if ('clickThrough' in patch) setIgnore(!patch.clickThrough);
   saveSettings();
   win?.webContents.send('settings-changed', settings);
   rebuildTrayMenu();
@@ -297,6 +299,12 @@ function rebuildTrayMenu() {
       type: 'checkbox',
       checked: settings.wander,
       click: (item) => updateSettings({ wander: item.checked }),
+    },
+    {
+      label: 'キャラ以外をクリック透過',
+      type: 'checkbox',
+      checked: settings.clickThrough,
+      click: (item) => updateSettings({ clickThrough: item.checked }),
     },
     {
       label: '大きさ',

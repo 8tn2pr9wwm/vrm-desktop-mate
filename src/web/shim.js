@@ -104,6 +104,7 @@ function rebuildMenu() {
     check('首の傾きをまねる', 'mimicHeadTilt'),
     check('目に目線を入れる', 'eyeCensor'),
     check('歩き回る', 'wander'),
+    check('キャラ以外をクリック透過', 'clickThrough'),
     '<fieldset><legend>大きさ</legend>',
     radio('小', 'characterHeight', 200),
     radio('中', 'characterHeight', 300),
