@@ -39,6 +39,16 @@ npm run dist       # dmg / zip ビルド
 - プロジェクトを別パスへ移動した場合、カメラ権限は Electron.app のパス単位で
   再要求される(macOS の TCC 仕様)。
 
+## リリース手順
+
+```bash
+# 1. package.json の version を上げる(ファイル名はここから取られる!)
+# 2. コミット → タグ → push で GitHub Actions が Release を自動作成
+git tag -a v0.1.x -m "v0.1.x" && git push origin main v0.1.x
+# 結果は https://github.com/8tn2pr9wwm/vrm-desktop-mate/releases
+# 手動ビルド(リリースなし)は Actions → Build → Run workflow で Artifacts に出る
+```
+
 ## 構成
 
 - `src/main.js` … メインプロセス。透明・最前面・クリック透過ウィンドウ、Tray メニュー、設定永続化(`~/Library/Application Support/VRM Desktop Mate/settings.json`)

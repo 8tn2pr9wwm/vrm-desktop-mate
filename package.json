@@ -1,7 +1,7 @@
 {
   "name": "vrm-desktop-mate",
   "productName": "VRM Desktop Mate",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "デスクトップを歩き回り、カメラで捉えたユーザーの顔・視線の方向を向くVRMマスコット",
   "main": "src/main.js",
   "scripts": {
