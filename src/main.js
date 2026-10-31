@@ -42,6 +42,8 @@ const DEFAULT_SETTINGS = {
   clockMode: 'hour',
   weatherDoodle: true,
   clickThrough: true,
+  vrmList: [],
+  vrmRotate: false,
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -207,6 +209,33 @@ function trayDiag(msg) {
   try {
     fs.appendFileSync(path.join(app.getPath('userData'), 'tray-debug.log'), `${new Date().toISOString()} ${msg}\n`);
   } catch {}
+}
+
+async function chooseVrmList() {
+  win?.setAlwaysOnTop(false);
+  app.focus({ steal: true });
+  let result;
+  try {
+    result = await dialog.showOpenDialog({
+      title: 'ローテーションするVRMを選択（複数可）',
+      filters: [{ name: 'VRM', extensions: ['vrm'] }],
+      properties: ['openFile', 'multiSelections'],
+    });
+  } finally {
+    win?.setAlwaysOnTop(true, 'floating');
+  }
+  if (!result.canceled && result.filePaths.length) {
+    updateSettings({ vrmList: result.filePaths });
+    if (!settings.vrmPath && result.filePaths[0]) updateSettings({ vrmPath: result.filePaths[0] });
+  }
+}
+
+/** Advance to the next VRM in the rotation list; force=true ignores the hourly-toggle setting. */
+function rotateVrm(force = false) {
+  const list = settings.vrmList.filter((p) => fs.existsSync(p));
+  if (list.length < 2 || (!settings.vrmRotate && !force)) return;
+  const i = list.indexOf(settings.vrmPath);
+  updateSettings({ vrmPath: list[(i + 1) % list.length] });
 }
 
 function trayIcon() {
@@ -387,6 +416,24 @@ function rebuildTrayMenu() {
       enabled: !!settings.vrmPath,
       click: () => updateSettings({ vrmPath: null }),
     },
+    {
+      label: `VRMローテーション（候補 ${settings.vrmList.length}体）`,
+      submenu: [
+        { label: '切り替え候補を選ぶ…', click: chooseVrmList },
+        {
+          label: '1時間ごとに切り替える',
+          type: 'checkbox',
+          checked: settings.vrmRotate,
+          enabled: settings.vrmList.length > 1,
+          click: (item) => updateSettings({ vrmRotate: item.checked }),
+        },
+        {
+          label: '今すぐ次のVRMに切替',
+          enabled: settings.vrmList.length > 1,
+          click: () => rotateVrm(true),
+        },
+      ],
+    },
     { type: 'separator' },
     { label: '終了', role: 'quit' },
   ]);
@@ -468,6 +515,8 @@ app.whenReady().then(async () => {
   screen.on('display-metrics-changed', fitWindowToDisplay);
   screen.on('display-added', fitWindowToDisplay);
   screen.on('display-removed', fitWindowToDisplay);
+
+  setInterval(() => rotateVrm(false), 60 * 60 * 1000);
 });
 
 app.on('window-all-closed', () => app.quit());
