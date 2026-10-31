@@ -45,6 +45,7 @@ const DEFAULT_SETTINGS = {
 let settings = { ...DEFAULT_SETTINGS };
 let win = null;
 let tray = null;
+let trayMenu = null;
 let cursorTimer = null;
 
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
@@ -185,8 +186,10 @@ function createWindow() {
 }
 
 function trayIcon() {
-  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'trayTemplate.png'));
-  icon.setTemplateImage(true);
+  // Template images are a macOS menu-bar concept; Windows needs a visibly-colored icon for dark taskbars.
+  const file = process.platform === 'win32' ? 'tray.png' : 'trayTemplate.png';
+  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', file));
+  if (process.platform === 'darwin') icon.setTemplateImage(true);
   return icon;
 }
 
@@ -208,7 +211,6 @@ async function chooseVrm() {
 }
 
 function rebuildTrayMenu() {
-  if (!tray) return;
   const sizes = [
     ['小', 200],
     ['中', 300],
@@ -345,7 +347,8 @@ function rebuildTrayMenu() {
     { type: 'separator' },
     { label: '終了', role: 'quit' },
   ]);
-  tray.setContextMenu(menu);
+  trayMenu = menu;
+  tray?.setContextMenu(menu);
 }
 
 function registerIpc() {
@@ -376,6 +379,7 @@ function registerIpc() {
     const buf = await fs.promises.readFile(file);
     return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
   });
+  ipcMain.on('show-menu', () => trayMenu?.popup({ window: win }));
   ipcMain.on('set-ignore-mouse', (_e, ignore) => {
     if (!win || DEBUG) return;
     win.setIgnoreMouseEvents(ignore, { forward: true });
@@ -408,8 +412,13 @@ app.whenReady().then(async () => {
   refreshWeather();
   setInterval(refreshWeather, WEATHER_REFRESH_MS);
 
-  tray = new Tray(trayIcon());
-  tray.setToolTip('VRM Desktop Mate');
+  try {
+    tray = new Tray(trayIcon());
+    tray.setToolTip('VRM Desktop Mate');
+    if (process.platform === 'win32') tray.on('click', () => tray.popUpContextMenu());
+  } catch (e) {
+    console.error('tray creation failed:', e);
+  }
   rebuildTrayMenu();
 
   screen.on('display-metrics-changed', fitWindowToDisplay);

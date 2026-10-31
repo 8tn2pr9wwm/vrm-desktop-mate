@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('mate', {
   readVrm: () => ipcRenderer.invoke('read-vrm'),
   loadMotion: (id) => ipcRenderer.invoke('load-motion', id),
   setIgnoreMouse: (ignore) => ipcRenderer.send('set-ignore-mouse', ignore),
+  showMenu: () => ipcRenderer.send('show-menu'),
   dropVrm: (file) => ipcRenderer.send('vrm-dropped', webUtils.getPathForFile(file)),
   onSettingsChanged: on('settings-changed'),
   onBoundsChanged: on('bounds-changed'),

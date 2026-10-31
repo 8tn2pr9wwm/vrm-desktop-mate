@@ -146,6 +146,11 @@ window.addEventListener('pointerup', () => {
   document.body.classList.remove('grabbing');
   updateHover();
 });
+window.addEventListener('contextmenu', (e) => {
+  if (!hovering) return;
+  e.preventDefault();
+  mate.showMenu();
+});
 window.addEventListener('dragover', (e) => e.preventDefault());
 window.addEventListener('drop', (e) => {
   e.preventDefault();
