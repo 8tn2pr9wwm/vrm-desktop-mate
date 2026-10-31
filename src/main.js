@@ -169,9 +169,9 @@ function createHandle() {
     focusable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload-handle.js'),
-      contextIsolation: true,
+      contextIsolation: false,
       nodeIntegration: false,
-      sandbox: true,
+      sandbox: false,
     },
   });
   handle.setAlwaysOnTop(true, 'floating');
@@ -661,8 +661,10 @@ function registerIpc() {
     handle.setBounds({ x: Math.round(b.x + left), y: Math.round(b.y + top), width: Math.round(width), height: Math.round(height) });
     if (!handle.isVisible()) handle.showInactive();
   });
+  let handleEvCount = 0;
   ipcMain.on('handle-pointer', (_e, ev) => {
     if (!win || !handle || handle.isDestroyed()) return;
+    if (++handleEvCount <= 5 || handleEvCount % 300 === 0) trayDiag(`handle-pointer #${handleEvCount}: ${ev.type}`);
     if (ev.type === 'menu') {
       trayMenu?.popup({ window: handle });
       return;

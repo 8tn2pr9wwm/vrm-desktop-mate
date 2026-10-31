@@ -1,8 +1,8 @@
 'use strict';
 
-const { contextBridge, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('handleBridge', {
+globalThis.handleBridge = {
   sendPointer: (type, e) =>
     ipcRenderer.send('handle-pointer', {
       type,
@@ -10,4 +10,4 @@ contextBridge.exposeInMainWorld('handleBridge', {
       y: e.clientY,
       button: e.button,
     }),
-});
+};
