@@ -1,0 +1,68 @@
+{
+  "name": "vrm-desktop-mate",
+  "productName": "VRM Desktop Mate",
+  "version": "0.1.0",
+  "description": "デスクトップを歩き回り、カメラで捉えたユーザーの顔・視線の方向を向くVRMマスコット",
+  "main": "src/main.js",
+  "scripts": {
+    "build:renderer": "esbuild src/renderer/app.js --bundle --format=esm --target=chrome130 --outfile=src/renderer/bundle.js --log-level=warning",
+    "start": "npm run build:renderer && electron .",
+    "dev": "npm run build:renderer && electron . --mate-debug",
+    "dist": "npm run build:renderer && electron-builder --mac",
+    "dist:dir": "npm run build:renderer && electron-builder --mac --dir",
+    "check": "node --check src/main.js && node --check src/preload.js && npm run build:renderer"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^1.2.0",
+    "@pixiv/three-vrm-animation": "^3.5.5"
+  },
+  "devDependencies": {
+    "@pixiv/three-vrm": "^3.5.5",
+    "electron": "^41.7.1",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "three": "^0.186.1"
+  },
+  "build": {
+    "appId": "dev.vrm-desktop-mate.app",
+    "productName": "VRM Desktop Mate",
+    "files": [
+      "src/main.js",
+      "src/preload.js",
+      "src/motions.json",
+      "src/renderer/index.html",
+      "src/renderer/bundle.js",
+      "assets/**/*",
+      "node_modules/@mediapipe/tasks-vision/wasm/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSCameraUsageDescription": "あなたの顔の向きと視線を推定して、キャラクターがあなたの方を向くために使います。映像は端末内でのみ処理され、保存・送信されません。",
+        "LSUIElement": true
+      }
+    },
+    "asar": false
+  }
+}

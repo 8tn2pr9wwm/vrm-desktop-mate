@@ -1,0 +1,317 @@
+[
+ {
+  "id": "upper_P001",
+  "name": "胸の前で両手ハート",
+  "category": "かわいい",
+  "contact": "hands"
+ },
+ {
+  "id": "upper_P002",
+  "name": "頭の上で両腕ハート",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P003",
+  "name": "頬の横で指ハート",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P004",
+  "name": "あごの下でダブルピース",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P005",
+  "name": "ギャルピース（手の甲ピース）",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P006",
+  "name": "グー手ほっぺ（ぶりっ子）",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P007",
+  "name": "うさみみポーズ",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P008",
+  "name": "招き猫の猫の手",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P009",
+  "name": "がおーポーズ",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P010",
+  "name": "しーっ（人差し指を唇）",
+  "category": "かわいい",
+  "contact": "mouth"
+ },
+ {
+  "id": "upper_P011",
+  "name": "首かしげ＋片目に手（ウインク風）",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P013",
+  "name": "両手のひらにあご乗せ（花ポーズ）",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P015",
+  "name": "萌え袖風に両手で口元を隠す",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P016",
+  "name": "お願いポーズ（両手を合わせる）",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P017",
+  "name": "自分を抱きしめる照れポーズ",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P018",
+  "name": "指フレーム",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P019",
+  "name": "髪を耳にかけるしぐさ",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P020",
+  "name": "両手でほっぺを包む",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P021",
+  "name": "敬礼ポーズ",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P022",
+  "name": "カメラを指差す",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P023",
+  "name": "あくび伸び（片手を口元）",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P024",
+  "name": "片手ハート＋もう片手を胸",
+  "category": "かわいい"
+ },
+ {
+  "id": "upper_P025",
+  "name": "両手の指の隙間からのぞく",
+  "category": "かわいい"
+ },
+ {
+  "id": "full_P015",
+  "name": "立ち・コントラポスト腰に手",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P017",
+  "name": "立ち・肩越しに振り向く",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P018",
+  "name": "立ち・両手を腰に",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P020",
+  "name": "立ち・片手を後頭部に",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P022",
+  "name": "立ち・腕を後ろに胸を張る",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P027",
+  "name": "立ち・うなじに両手",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P029",
+  "name": "立ち・髪をなびかせる",
+  "category": "立ち"
+ },
+ {
+  "id": "full_P031",
+  "name": "膝立ち・両手を腿に",
+  "category": "膝立ち"
+ },
+ {
+  "id": "full_P033",
+  "name": "片膝立ち・膝に手",
+  "category": "膝立ち"
+ },
+ {
+  "id": "full_P037",
+  "name": "片膝立ち・見上げる",
+  "category": "膝立ち"
+ },
+ {
+  "id": "full_P052",
+  "name": "仰向け・片膝を立てる",
+  "category": "寝そべり"
+ },
+ {
+  "id": "full_P057",
+  "name": "横向き寝・片腕を頭上",
+  "category": "寝そべり"
+ },
+ {
+  "id": "full_P058",
+  "name": "うつ伏せ・腕枕",
+  "category": "寝そべり"
+ },
+ {
+  "id": "full_P061",
+  "name": "しゃがみ・膝に手",
+  "category": "しゃがみ"
+ },
+ {
+  "id": "full_P062",
+  "name": "しゃがみ・片手を床に",
+  "category": "しゃがみ"
+ },
+ {
+  "id": "full_P063",
+  "name": "しゃがみ・頬杖",
+  "category": "しゃがみ"
+ },
+ {
+  "id": "full_P064",
+  "name": "しゃがみ・髪に手",
+  "category": "しゃがみ"
+ },
+ {
+  "id": "full_P067",
+  "name": "前かがみ・膝に手",
+  "category": "前かがみ"
+ },
+ {
+  "id": "full_P069",
+  "name": "前かがみ・片手を腰・見上げる",
+  "category": "前かがみ"
+ },
+ {
+  "id": "full_P077",
+  "name": "ひねり・立ち姿勢で腕を広げる",
+  "category": "ひねり"
+ },
+ {
+  "id": "full_P002",
+  "name": "片手支え・脚前方流し",
+  "category": "座り"
+ },
+ {
+  "id": "full_P003",
+  "name": "両手後ろ支え・胸を張る",
+  "category": "座り"
+ },
+ {
+  "id": "full_P004",
+  "name": "三角座り・膝を左へ傾ける",
+  "category": "座り"
+ },
+ {
+  "id": "full_P010",
+  "name": "足首に手を添える",
+  "category": "座り"
+ },
+ {
+  "id": "full_P012",
+  "name": "片膝立て・頬杖",
+  "category": "座り"
+ },
+ {
+  "id": "full_P041",
+  "name": "女の子座り・両手を腿に",
+  "category": "横座り・女の子座り"
+ },
+ {
+  "id": "full_P042",
+  "name": "女の子座り・前に手をつく",
+  "category": "横座り・女の子座り"
+ },
+ {
+  "id": "full_P045",
+  "name": "横座り・右に脚を流す",
+  "category": "横座り・女の子座り"
+ },
+ {
+  "id": "full_P046",
+  "name": "横座り・頬に手",
+  "category": "横座り・女の子座り"
+ },
+ {
+  "id": "full_P048",
+  "name": "女の子座り・首元に手",
+  "category": "横座り・女の子座り"
+ },
+ {
+  "id": "vrma_wave",
+  "name": "手を振る",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_joy_jump",
+  "name": "喜んでジャンプ",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_bow",
+  "name": "お辞儀",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_stretch",
+  "name": "伸び",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_clap",
+  "name": "拍手",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_dance",
+  "name": "ちょっと踊る",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_yawn",
+  "name": "眠そうにあくび",
+  "category": "モーション",
+  "source": "vrma"
+ },
+ {
+  "id": "vrma_head_tilt",
+  "name": "首をかしげる",
+  "category": "モーション",
+  "source": "vrma"
+ }
+]
