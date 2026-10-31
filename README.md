@@ -1,6 +1,6 @@
 # VRM Desktop Mate
 
-デスクトップ上をVRMキャラクターが歩き回り、Macのカメラで捉えたあなたの顔の位置・向き・視線に合わせて、首や目線をあなたの方へ向けるデスクトップマスコットです。
+デスクトップ上をVRMキャラクターが歩き回り、カメラで捉えたあなたの顔の位置・向き・視線に合わせて、首や目線をあなたの方へ向けるデスクトップマスコットです。Mac / Windows / Linux に対応。
 
 - Electron + three.js + [@pixiv/three-vrm](https://github.com/pixiv/three-vrm)
 - 顔・視線推定: [MediaPipe Face Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)（モデル・WASMは同梱。映像は端末内でのみ処理し、保存・送信はしません）
@@ -17,6 +17,37 @@
 - 好きなVRM（VRM 0.x / 1.0）をメニューから選択、またはキャラクターにドロップして差し替え
 
 ウィンドウは画面全体を覆う透明・最前面・クリック透過ウィンドウで、キャラクターの上にカーソルがある時だけマウス操作を受け付けます。
+
+## ビルド済みアプリを使う
+
+[Releases](https://github.com/8tn2pr9wwm/vrm-desktop-mate/releases) から各OS向けをダウンロード。
+
+### Mac
+
+`.app` を `/Applications` などに置いてダブルクリック。Dockに出ないメニューバー常駐型アプリです（右上の人型アイコンがメニュー）。未署名なので初回は右クリック →「開く」。初回起動時にカメラ許可を求められます。
+
+### Windows
+
+`Setup *.exe`（インストーラー、x64/32bit両対応）または `*-win.zip`（ポータブル）。未署名のため初回に SmartScreen が出ます →「詳細情報」→「実行」。
+
+- **メニューの出し方**: キャラクターを**右クリック**するか、タスクバー右端のトレイアイコン（「^」の中に隠れていることが多い）をクリック
+- トレイアイコンを常時表示するには: 設定 → 個人用設定 → タスクバー → 他のシステムトレイアイコン → VRM Desktop Mate を ON
+- 終了はメニューの「終了」から（Dock/タスクバーに出ない仕様のため）
+
+### Linux（PC / Raspberry Pi / Radxa 等の SBC）
+
+`*.AppImage` が手軽です（実行権限を付けてダブルクリック）。
+
+- AppImage が起動しない場合: `sudo apt install libfuse2`、または `--appimage-extract-and-run` を付けて実行
+- **X11 セッション推奨**: 透明・最前面・クリック透過ウィンドウは X11 でのみ正常動作します。Wayland では制約が多いです（Ubuntu: ログイン画面の歯車 → 「Ubuntu on Xorg」、Raspberry Pi OS: `raspi-config` → Advanced → Wayland → X11）
+- アーキテクチャ: `x64`(PC) / `arm64`(Raspberry Pi OS 64bit, Radxa OS 等) / `armv7l`(32bit Raspberry Pi OS)
+- トレイが出ない環境（GNOME では AppIndicator 拡張が必要なことがある）でも、キャラクターの右クリックで同じメニューが出ます
+
+### SBC（Radxa Cubie A7Z 等）向けメモ
+
+- カメラは **USB Webカメラ** を使用（MIPI CSI カメラは Chromium から直接は見えません。USB-C ボードではハブ経由で）
+- GPU ドライバの関係で画面が真っ黒・描画が壊れる場合は `--use-gl=swiftshader` でソフトウェア描画に逃がせます（低速）
+- 非力なCPUでは顔推定のfpsが落ちます。キャラクターサイズを小さめにすると軽くなります
 
 ## 動かし方（開発）
 
@@ -46,15 +77,16 @@ npm run dist       # dist/ に dmg と zip (arm64 / x64) を出力
 | カメラで顔・視線を追従 | カメラのオン/オフ |
 | 見る先 | あなたの顔 / あなたが見ている場所 |
 | 首の傾きをまねる | 頭のロール（傾き）をミラーする |
+| 目に目線を入れる(プライバシー) | 目に黒い帯をかぶせて顔を隠す |
 | 歩き回る | オフにするとその場で待機 |
-| 大きさ | 小 / 中 / 大 |
+| 大きさ | 小 / 中 / 大 / 特大 |
 | 視線キャリブレーション | キャラクターを見つめながらクリックすると、推定視線のズレを補正 |
 | カメラプレビューを表示 | 推定値・顔ランドマーク・推定視線位置（ピンクの丸）を表示 |
 | 投げキッス / くるっと回る / しゃがんで猫を撫でる | その動作をすぐ実行 |
 | ポーズ（AnimeVRM Motions） | カテゴリ別のポーズ、または「おまかせ」でランダム |
 | VRMを開く… | 任意のVRMファイルを読み込む |
 
-設定は `~/Library/Application Support/VRM Desktop Mate/settings.json` に保存されます。メニューにない調整値:
+設定は `settings.json` に保存されます（Mac: `~/Library/Application Support/VRM Desktop Mate/`、Windows: `%APPDATA%/VRM Desktop Mate/`、Linux: `~/.config/VRM Desktop Mate/`）。メニューにない調整値:
 
 - `pixelPitchMm`（既定 0.2）: 画面の1ポイントあたりの物理サイズ(mm)。MacBook内蔵画面はおおむね0.2。外部モニタでは `画面の横幅(mm) / 横の解像度(ポイント)` を設定
 - `cameraFovDeg`（既定 65）: カメラの水平画角
