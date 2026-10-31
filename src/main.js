@@ -139,8 +139,13 @@ function fitWindowToDisplay() {
 // character receives pointer input instead and forwards it as IPC.
 function setIgnore(ignore) {
   if (!win) return;
-  if (process.platform === 'linux') win.setIgnoreMouseEvents(true);
-  else win.setIgnoreMouseEvents(ignore, { forward: true });
+  if (process.platform === 'linux') {
+    win.setIgnoreMouseEvents(true);
+    // Re-apply after the window maps — the very first call can silently no-op on X11.
+    for (const ms of [500, 2000]) {
+      setTimeout(() => win && !win.isDestroyed() && win.setIgnoreMouseEvents(true), ms);
+    }
+  } else win.setIgnoreMouseEvents(ignore, { forward: true });
 }
 
 function createHandle() {
@@ -160,7 +165,7 @@ function createHandle() {
     fullscreenable: false,
     skipTaskbar: true,
     alwaysOnTop: true,
-    show: true,
+    show: false,
     focusable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload-handle.js'),
@@ -646,12 +651,15 @@ function registerIpc() {
     if (!handle || handle.isDestroyed() || !win) return;
     const b = win.getBounds();
     const pad = 12;
-    handle.setBounds({
-      x: Math.round(b.x + r.left - pad),
-      y: Math.round(b.y + r.top - pad),
-      width: Math.max(1, Math.round(r.right - r.left + pad * 2)),
-      height: Math.max(1, Math.round(r.bottom - r.top + pad * 2)),
-    });
+    // Sanitize: a bogus/huge rect would make the handle cover the whole screen and eat all input.
+    const nums = [r?.left, r?.top, r?.right, r?.bottom];
+    if (nums.some((n) => typeof n !== 'number' || !Number.isFinite(n))) return;
+    const left = Math.max(0, r.left - pad);
+    const top = Math.max(0, r.top - pad);
+    const width = Math.min(Math.max(1, r.right - r.left + pad * 2), b.width - left);
+    const height = Math.min(Math.max(1, r.bottom - r.top + pad * 2), b.height - top);
+    handle.setBounds({ x: Math.round(b.x + left), y: Math.round(b.y + top), width: Math.round(width), height: Math.round(height) });
+    if (!handle.isVisible()) handle.showInactive();
   });
   ipcMain.on('handle-pointer', (_e, ev) => {
     if (!win || !handle || handle.isDestroyed()) return;
