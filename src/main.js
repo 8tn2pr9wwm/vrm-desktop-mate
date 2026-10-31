@@ -196,8 +196,8 @@ function trayDiag(msg) {
 }
 
 function trayIcon() {
-  // Template images are a macOS menu-bar concept; Windows needs a visibly-colored icon for dark taskbars.
-  const file = process.platform === 'win32' ? 'tray.png' : 'trayTemplate.png';
+  // Template images are a macOS menu-bar concept; other platforms need a visibly-colored icon for dark panels/taskbars.
+  const file = process.platform === 'darwin' ? 'trayTemplate.png' : 'tray.png';
   const p = path.join(__dirname, '..', 'assets', file);
   let icon = nativeImage.createFromPath(p);
   if (icon.isEmpty()) {

@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +32,7 @@ jobs:
             dist/*.exe
             dist/*.zip
             dist/*.dmg
+            dist/*.AppImage
             dist/*.blockmap
           if-no-files-found: ignore
       - name: Release
@@ -42,4 +43,5 @@ jobs:
             dist/*.exe
             dist/*.zip
             dist/*.dmg
+            dist/*.AppImage
             dist/*.blockmap
