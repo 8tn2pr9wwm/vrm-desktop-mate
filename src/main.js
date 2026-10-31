@@ -260,6 +260,39 @@ async function chooseVrmList() {
 }
 
 /** Advance to the next VRM in the rotation list; force=true ignores the hourly-toggle setting. */
+const USER_MOTION_DIR = () => path.join(app.getPath('userData'), 'motions-vrma');
+
+/** .vrma files the user added — scanned fresh each time so files dropped into the folder just work. */
+function userMotions() {
+  try {
+    return fs
+      .readdirSync(USER_MOTION_DIR())
+      .filter((f) => f.toLowerCase().endsWith('.vrma'))
+      .map((f) => ({ id: `user:${f}`, name: path.basename(f, path.extname(f)), category: 'ユーザー', source: 'user' }));
+  } catch {
+    return [];
+  }
+}
+
+async function addUserVrma() {
+  win?.setAlwaysOnTop(false);
+  app.focus({ steal: true });
+  let result;
+  try {
+    result = await dialog.showOpenDialog({
+      title: 'VRMAモーションを追加（複数可）',
+      filters: [{ name: 'VRMA', extensions: ['vrma'] }],
+      properties: ['openFile', 'multiSelections'],
+    });
+  } finally {
+    win?.setAlwaysOnTop(true, 'floating');
+  }
+  if (result.canceled || !result.filePaths.length) return;
+  fs.mkdirSync(USER_MOTION_DIR(), { recursive: true });
+  for (const src of result.filePaths) fs.copyFileSync(src, path.join(USER_MOTION_DIR(), path.basename(src)));
+  rebuildTrayMenu();
+}
+
 function rotateVrm(force = false) {
   const list = settings.vrmList.filter((p) => fs.existsSync(p));
   if (list.length < 2 || (!settings.vrmRotate && !force)) return;
@@ -440,10 +473,18 @@ function rebuildTrayMenu() {
     },
     {
       label: 'モーション（Text-To-VRMA形式）',
-      submenu: MOTIONS.filter((m) => m.source === 'vrma').map((m) => ({
-        label: m.name,
-        click: () => win?.webContents.send('perform-action', `pose:${m.id}`),
-      })),
+      submenu: [
+        ...MOTIONS.filter((m) => m.source === 'vrma').map((m) => ({
+          label: m.name,
+          click: () => win?.webContents.send('perform-action', `pose:${m.id}`),
+        })),
+        ...userMotions().map((m) => ({
+          label: `${m.name}（追加）`,
+          click: () => win?.webContents.send('perform-action', `pose:${m.id}`),
+        })),
+        { type: 'separator' },
+        { label: 'VRMAを追加…', click: addUserVrma },
+      ],
     },
       ],
     },
@@ -494,10 +535,14 @@ function registerIpc() {
     return { name: path.basename(file), data: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) };
   });
   ipcMain.handle('load-motion', async (_e, id) => {
-    const motion = MOTIONS.find((m) => m.id === id);
+    const motion = [...MOTIONS, ...userMotions()].find((m) => m.id === id);
     if (!motion) throw new Error(`unknown motion ${id}`);
     if (motion.source === 'vrma') {
       const buf = await fs.promises.readFile(path.join(__dirname, '..', 'assets', 'motions', `${id}.vrma`));
+      return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    }
+    if (motion.source === 'user') {
+      const buf = await fs.promises.readFile(path.join(USER_MOTION_DIR(), id.slice('user:'.length)));
       return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
     }
     const dir = path.join(app.getPath('userData'), 'motions');
@@ -543,8 +588,13 @@ function registerIpc() {
     });
   });
   ipcMain.on('vrm-dropped', (_e, filePath) => {
-    if (typeof filePath === 'string' && filePath.toLowerCase().endsWith('.vrm') && fs.existsSync(filePath)) {
-      updateSettings({ vrmPath: filePath });
+    if (typeof filePath !== 'string' || !fs.existsSync(filePath)) return;
+    const lower = filePath.toLowerCase();
+    if (lower.endsWith('.vrm')) updateSettings({ vrmPath: filePath });
+    else if (lower.endsWith('.vrma')) {
+      fs.mkdirSync(USER_MOTION_DIR(), { recursive: true });
+      fs.copyFileSync(filePath, path.join(USER_MOTION_DIR(), path.basename(filePath)));
+      rebuildTrayMenu();
     }
   });
 }
