@@ -95,6 +95,7 @@ function rebuildMenu() {
     radio("\u4E2D", "characterHeight", 300),
     radio("\u5927", "characterHeight", 420),
     radio("\u7279\u5927", "characterHeight", 560),
+    radio("\u7279\u7279\u5927", "characterHeight", 720),
     "</fieldset>",
     `<button class="act" data-cal>\u8996\u7DDA\u30AD\u30E3\u30EA\u30D6\u30EC\u30FC\u30B7\u30E7\u30F3</button>`,
     `<button class="act" data-reset-cal>\u30AD\u30E3\u30EA\u30D6\u30EC\u30FC\u30B7\u30E7\u30F3\u3092\u30EA\u30BB\u30C3\u30C8</button>`,

@@ -109,6 +109,7 @@ function rebuildMenu() {
     radio('中', 'characterHeight', 300),
     radio('大', 'characterHeight', 420),
     radio('特大', 'characterHeight', 560),
+    radio('特特大', 'characterHeight', 720),
     '</fieldset>',
     `<button class="act" data-cal>視線キャリブレーション</button>`,
     `<button class="act" data-reset-cal>キャリブレーションをリセット</button>`,
