@@ -4,6 +4,7 @@ import { FaceTracker } from './tracker.js';
 
 const mate = window.mate;
 const DEBUG = new URLSearchParams(location.search).has('debug');
+const LINUX = new URLSearchParams(location.search).has('linux');
 
 const canvas = document.getElementById('scene');
 const previewEl = document.getElementById('preview');
@@ -108,7 +109,9 @@ let pointerDown = null;
 
 function updateHover() {
   const r = character.screenRect(ppm, view.h);
-  const inside = cursor.x >= r.left && cursor.x <= r.right && cursor.y >= r.top && cursor.y <= r.bottom;
+  // Linux: enlarge the hot zone so click-through lifts before the pointer actually presses.
+  const pad = LINUX ? 90 : 0;
+  const inside = cursor.x >= r.left - pad && cursor.x <= r.right + pad && cursor.y >= r.top - pad && cursor.y <= r.bottom + pad;
   const next = inside || character.state === 'held';
   if (next !== hovering) {
     hovering = next;

@@ -128,10 +128,15 @@ function fitWindowToDisplay() {
 }
 
 // {forward:true} is only supported on macOS/Windows and makes the toggle unreliable on Linux.
+// X11 shape-region updates also race with pointer grabs, so re-apply the toggle shortly after.
 function setIgnore(ignore) {
   if (!win) return;
-  if (process.platform === 'linux') win.setIgnoreMouseEvents(ignore);
-  else win.setIgnoreMouseEvents(ignore, { forward: true });
+  if (process.platform === 'linux') {
+    win.setIgnoreMouseEvents(ignore);
+    setTimeout(() => win && !win.isDestroyed() && win.setIgnoreMouseEvents(ignore), 120);
+  } else {
+    win.setIgnoreMouseEvents(ignore, { forward: true });
+  }
 }
 
 function createWindow() {
@@ -164,7 +169,7 @@ function createWindow() {
   if (!DEBUG) setIgnore(true);
 
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'), {
-    query: DEBUG ? { debug: '1' } : {},
+    query: { ...(DEBUG ? { debug: '1' } : {}), ...(process.platform === 'linux' ? { linux: '1' } : {}) },
   });
   win.once('ready-to-show', () => win.showInactive());
   if (DEBUG) {
