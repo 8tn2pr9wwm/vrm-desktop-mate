@@ -46,8 +46,36 @@
 ### SBC（Radxa Cubie A7Z 等）向けメモ
 
 - カメラは **USB Webカメラ** を使用（MIPI CSI カメラは Chromium から直接は見えません。USB-C ボードではハブ経由で）
-- GPU ドライバの関係で画面が真っ黒・描画が壊れる場合は `--use-gl=swiftshader` でソフトウェア描画に逃がせます（低速）
 - 非力なCPUでは顔推定のfpsが落ちます。キャラクターサイズを小さめにすると軽くなります
+
+#### Radxa / Allwinner (PowerVR GPU) での起動
+
+`error while loading shared libraries: libz.so` が出る場合は開発用パッケージが必要:
+
+```bash
+sudo apt install zlib1g-dev   # libz.so を提供（zlib1g には libz.so.1 のみ）
+```
+
+PowerVR のドライバは Chromium の要求する GLX/EGL を提供しないため、**ハードウェアGPUは使えません**。以下のフラグでソフトウェア WebGL (SwiftShader) で動作します:
+
+```bash
+./VRM.Desktop.Mate-*-arm64.AppImage \
+  --no-sandbox --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader
+```
+
+- `--no-sandbox`: カーネルのサンドボックス機構が無い環境で必要
+- `--use-angle=swiftshader` + `--enable-unsafe-swiftshader`: 新しい Chromium でソフトウェア WebGL を有効化（`--disable-gpu` は WebGL 自体を無効化するので**使わない**）
+
+起動スクリプト例:
+
+```bash
+cat > ~/vrm-mate.sh <<'EOF'
+#!/bin/bash
+exec ~/Downloads/VRM.Desktop.Mate-*-arm64.AppImage \
+  --no-sandbox --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader "$@"
+EOF
+chmod +x ~/vrm-mate.sh
+```
 
 ## 動かし方（開発）
 
