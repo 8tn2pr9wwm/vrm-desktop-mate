@@ -17,6 +17,16 @@ const {
 } = require('electron');
 
 const DEBUG = process.argv.includes('--mate-debug');
+
+if (process.platform === 'linux') {
+  // New Chromium requires opting in to the software WebGL fallback.
+  app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+  // SBC GPUs (VideoCore V3D etc.) work via native GLES where the desktop GL path fails.
+  if (process.arch === 'arm64' || process.arch === 'arm') {
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
+    app.commandLine.appendSwitch('use-angle', 'gles');
+  }
+}
 const FAKE_CAMERA = process.env.MATE_FAKE_CAMERA;
 if (FAKE_CAMERA) {
   app.commandLine.appendSwitch('use-fake-device-for-media-stream');
