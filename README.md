@@ -39,7 +39,8 @@
 `*.AppImage` が手軽です（実行権限を付けてダブルクリック）。
 
 - AppImage が起動しない場合: `sudo apt install libfuse2`、または `--appimage-extract-and-run` を付けて実行
-- **X11 セッション推奨**: 透明・最前面・クリック透過ウィンドウは X11 でのみ正常動作します。Wayland では制約が多いです（Ubuntu: ログイン画面の歯車 → 「Ubuntu on Xorg」、Raspberry Pi OS: `raspi-config` → Advanced → Wayland → X11）
+- **X11 セッション推奨**: 透明・最前面・クリック透過ウィンドウは X11 でのみ正常動作します。Wayland では**画面全体がクリックを吸ってデスクトップが操作不能になる**ので必須です（Ubuntu: ログイン画面の歯車 → 「Ubuntu on Xorg」、Raspberry Pi OS: `sudo raspi-config` → Advanced Options → Wayland → X11 → 再起動）
+- **X11 でも画面が真っ黒になる場合**: コンポジタが動いていません（透過描画に必須）。`sudo apt install picom && picom --daemon &` で起動し、動くなら `~/.config/lxsession/LXDE-pi/autostart` 等に `picom --daemon` を追加して自動起動にしてください
 - アーキテクチャ: `x64`(PC) / `arm64`(Raspberry Pi OS 64bit, Radxa OS 等) / `armv7l`(32bit Raspberry Pi OS)
 - トレイが出ない環境（GNOME では AppIndicator 拡張が必要なことがある）でも、キャラクターの右クリックで同じメニューが出ます
 
