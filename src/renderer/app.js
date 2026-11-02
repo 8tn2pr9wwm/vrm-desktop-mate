@@ -206,6 +206,21 @@ setInterval(() => {
   if (character.state === 'idle') character.perform('clock:message');
 }, 2000);
 
+// --- Shy reaction: face too close -> hold up the "don't stare" board ---
+let shyShown = false;
+setInterval(() => {
+  if (alert) return;
+  const head = tracker.state.present ? tracker.state.head : null;
+  if (head && head[2] < 0.28) {
+    shyShown = true;
+    character.board.setMessage('あんまり\nみないで♡');
+    if (character.state === 'idle') character.perform('clock:message');
+  } else if (shyShown) {
+    shyShown = false;
+    character.board.setMessage(null);
+  }
+}, 500);
+
 // --- Gaze ---
 let watchTime = 0;
 let lastRawGazePx = null;
