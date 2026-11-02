@@ -175,6 +175,7 @@ function createHandle() {
     },
   });
   handle.setAlwaysOnTop(true, 'floating');
+  handle.setSkipTaskbar(true);
   handle.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   handle.loadFile(path.join(__dirname, 'renderer', 'handle.html'));
 }
@@ -182,6 +183,7 @@ function createHandle() {
 function createWindow() {
   const { workArea } = screen.getPrimaryDisplay();
   win = new BrowserWindow({
+    icon: path.join(__dirname, '..', 'assets', 'icon.png'),
     ...workArea,
     transparent: true,
     backgroundColor: '#00000000',
@@ -660,6 +662,8 @@ function registerIpc() {
     const height = Math.min(Math.max(1, r.bottom - r.top + pad * 2), b.height - top);
     handle.setBounds({ x: Math.round(b.x + left), y: Math.round(b.y + top), width: Math.round(width), height: Math.round(height) });
     if (!handle.isVisible()) handle.showInactive();
+    // Keep the handle stacked above the click-through overlay, or pointer events stop reaching it.
+    handle.moveTop();
   });
   let handleEvCount = 0;
   ipcMain.on('handle-pointer', (_e, ev) => {
