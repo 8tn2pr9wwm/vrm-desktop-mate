@@ -232,7 +232,42 @@ function gazePx(face) {
   return { x: raw.x + settings.gazeOffset.x, y: raw.y + settings.gazeOffset.y };
 }
 
-mate.onPerformAction((action) => character.perform(action));
+// --- Lineup: show every rotation-list VRM standing in a row for 10s ---
+let lineupExtras = [];
+let lineupUntil = 0;
+async function showLineup() {
+  const list = settings.vrmList ?? [];
+  if (!list.length || lineupUntil || !mate.readVrmAt) return;
+  lineupUntil = performance.now() + 10000;
+  if (character.root) character.root.visible = false;
+  const w = view.w / ppm;
+  let slot = 0;
+  for (const p of list) {
+    try {
+      const src = await mate.readVrmAt(p);
+      if (!src) continue;
+      const c = new Character(scene);
+      c.loadMotion = (id) => mate.loadMotion(id);
+      await c.load(src.data);
+      c.position.set((w * (slot + 0.5)) / list.length, 0, 0);
+      slot++;
+      lineupExtras.push(c);
+    } catch (e) {
+      console.warn('lineup skip', p, e);
+    }
+  }
+}
+function endLineup() {
+  lineupUntil = 0;
+  for (const c of lineupExtras) c.dispose();
+  lineupExtras = [];
+  if (character.root) character.root.visible = true;
+}
+
+mate.onPerformAction((action) => {
+  if (action === 'lineup') return showLineup();
+  character.perform(action);
+});
 
 let weather = await mate.getWeather();
 const applyWeather = () => character.board.setWeather(settings.weatherDoodle ? weather : null);
@@ -312,7 +347,9 @@ function frame() {
   const now = performance.now();
   if (character.vrm) {
     const look = computeLook(dt, now);
-    character.update(dt, { worldWidth: view.w / ppm, wander: settings.wander, ...look });
+    character.update(dt, { worldWidth: view.w / ppm, wander: settings.wander && !lineupUntil, ...look });
+    for (const c of lineupExtras) c.update(dt, { worldWidth: view.w / ppm, wander: false, ...look });
+    if (lineupUntil && now > lineupUntil) endLineup();
     if (character.state === 'held' || character.state === 'fall') updateHover();
     if (LINUX && now - lastRectSent > 60) {
       lastRectSent = now;

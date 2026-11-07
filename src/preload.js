@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('mate', {
   getBounds: () => ipcRenderer.invoke('get-bounds'),
   updateSettings: (patch) => ipcRenderer.invoke('update-settings', patch),
   readVrm: () => ipcRenderer.invoke('read-vrm'),
+  readVrmAt: (p) => ipcRenderer.invoke('read-vrm-at', p),
   loadMotion: (id) => ipcRenderer.invoke('load-motion', id),
   setIgnoreMouse: (ignore) => ipcRenderer.send('set-ignore-mouse', ignore),
   showMenu: () => ipcRenderer.send('show-menu'),

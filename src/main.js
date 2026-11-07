@@ -611,6 +611,11 @@ function rebuildTrayMenu() {
           enabled: settings.vrmList.length > 1,
           click: () => rotateVrm(true),
         },
+        {
+          label: 'VRMを並べて表示（10秒）',
+          enabled: settings.vrmList.length > 0,
+          click: () => win?.webContents.send('perform-action', 'lineup'),
+        },
       ],
     },
       ],
@@ -627,6 +632,11 @@ function registerIpc() {
   ipcMain.handle('get-weather', () => weather);
   ipcMain.handle('get-bounds', () => win?.getBounds());
   ipcMain.handle('update-settings', (_e, patch) => updateSettings(patch));
+  ipcMain.handle('read-vrm-at', async (_e, p) => {
+    if (typeof p !== 'string' || !p.toLowerCase().endsWith('.vrm') || !fs.existsSync(p)) return null;
+    const buf = await fs.promises.readFile(p);
+    return { name: path.basename(p), data: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) };
+  });
   ipcMain.handle('read-vrm', async () => {
     const file = settings.vrmPath && fs.existsSync(settings.vrmPath) ? settings.vrmPath : DEFAULT_VRM;
     const buf = await fs.promises.readFile(file);
