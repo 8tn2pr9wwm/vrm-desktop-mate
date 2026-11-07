@@ -349,7 +349,11 @@ function frame() {
     const look = computeLook(dt, now);
     character.update(dt, { worldWidth: view.w / ppm, wander: settings.wander && !lineupUntil, ...look });
     for (const c of lineupExtras) c.update(dt, { worldWidth: view.w / ppm, wander: false, ...look });
-    if (lineupUntil && character.board?.group) character.board.group.visible = false;
+    if (lineupUntil) {
+      if (character.board?.group) character.board.group.visible = false;
+      if (character.cat?.group) character.cat.group.visible = false;
+      for (const it of character.effects?.items ?? []) it.sprite.visible = false;
+    }
     if (lineupUntil && now > lineupUntil) endLineup();
     if (character.state === 'held' || character.state === 'fall') updateHover();
     if (LINUX && now - lastRectSent > 60) {
