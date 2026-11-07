@@ -612,7 +612,7 @@ function rebuildTrayMenu() {
           click: () => rotateVrm(true),
         },
         {
-          label: 'VRMを並べて表示（10秒）',
+          label: 'VRMを並べて表示（20秒）',
           enabled: settings.vrmList.length > 0,
           click: () => win?.webContents.send('perform-action', 'lineup'),
         },

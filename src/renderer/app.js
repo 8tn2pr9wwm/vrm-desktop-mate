@@ -238,7 +238,7 @@ let lineupUntil = 0;
 async function showLineup() {
   const list = settings.vrmList ?? [];
   if (!list.length || lineupUntil || !mate.readVrmAt) return;
-  lineupUntil = performance.now() + 10000;
+  lineupUntil = performance.now() + 20000;
   if (character.root) character.root.visible = false;
   const w = view.w / ppm;
   let slot = 0;
@@ -349,6 +349,7 @@ function frame() {
     const look = computeLook(dt, now);
     character.update(dt, { worldWidth: view.w / ppm, wander: settings.wander && !lineupUntil, ...look });
     for (const c of lineupExtras) c.update(dt, { worldWidth: view.w / ppm, wander: false, ...look });
+    if (lineupUntil && character.board?.group) character.board.group.visible = false;
     if (lineupUntil && now > lineupUntil) endLineup();
     if (character.state === 'held' || character.state === 'fall') updateHover();
     if (LINUX && now - lastRectSent > 60) {
