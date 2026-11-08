@@ -267,6 +267,10 @@ function endLineup() {
   for (const c of lineupExtras) c.dispose();
   lineupExtras = [];
   if (character.root) character.root.visible = true;
+  // Clear anything that could have spawned mid-lineup (pet cat, board, effects).
+  character.cat?.update(0, { x: 0, z: 0, facing: 0, size: 1, walking: 0, happy: 0, opacity: 0 });
+  if (character.cat?.group) character.cat.group.visible = false;
+  character.board?.setMessage(null);
 }
 
 mate.onPerformAction((action) => {
