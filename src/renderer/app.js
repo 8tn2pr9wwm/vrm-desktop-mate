@@ -249,6 +249,11 @@ async function showLineup() {
       const c = new Character(scene);
       c.loadMotion = (id) => mate.loadMotion(id);
       await c.load(src.data);
+      // The lineup may have ended while this VRM was still loading — don't leave it behind.
+      if (!lineupUntil) {
+        c.dispose();
+        continue;
+      }
       c.position.set((w * (slot + 0.5)) / list.length, 0, 0);
       slot++;
       lineupExtras.push(c);
